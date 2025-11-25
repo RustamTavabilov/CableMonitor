@@ -1,0 +1,22 @@
+{% extends 'cable_manager/base.html' %}
+
+{% block content %}
+<div style="text-align: center; padding: 4rem 0;">
+    <h2>Система мониторинга кабельных линий</h2>
+    <p>Учет, анализ и прогнозирование состояния кабельных линий</p>
+    
+    {% if not user.is_authenticated %}
+        <div style="margin-top: 2rem;">
+            <a href="{% url 'login' %}" style="background: #3498db; color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 4px; display: inline-block;">
+                Войти в систему
+            </a>
+        </div>
+    {% else %}
+        <div style="margin-top: 2rem;">
+            <a href="{% url 'dashboard' %}" style="background: #27ae60; color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 4px; display: inline-block;">
+                Перейти к дашборду
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

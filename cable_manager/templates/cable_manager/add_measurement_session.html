@@ -1,0 +1,124 @@
+{% extends 'cable_manager/base.html' %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto;">
+    <h2>Добавить сессию измерений ЧР</h2>
+    <p style="color: #666; margin-bottom: 2rem;">Добавьте сессию измерений и укажите данные для нескольких уровней напряжения</p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
+            <h3 style="margin-top: 0;">Информация о сессии</h3>
+            {% for field in form %}
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.25rem; font-weight: bold;">{{ field.label }}:</label>
+                {{ field }}
+                {% if field.errors %}
+                    <div style="color: red; font-size: 0.9rem;">{{ field.errors }}</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
+            <h3 style="margin-top: 0;">Измерения при разных напряжениях</h3>
+            <p style="color: #666; font-size: 0.9rem;">Заполните данные для каждого уровня напряжения. Можно добавить несколько измерений.</p>
+
+            {{ formset.management_form }}
+
+            <div id="measurements-container">
+                {% for form in formset %}
+                <div class="measurement-form" style="border: 1px solid #ddd; padding: 1rem; margin-bottom: 1rem; border-radius: 4px; background: white;">
+                    <h4 style="margin-top: 0; color: #3498db;">Измерение {{ forloop.counter }}</h4>
+
+                    {% for field in form %}
+                        {% if field.name != 'DELETE' %}
+                        <div style="margin-bottom: 0.75rem;">
+                            <label style="display: block; margin-bottom: 0.25rem; font-size: 0.9rem;">{{ field.label }}:</label>
+                            {{ field }}
+                            {% if field.errors %}
+                                <div style="color: red; font-size: 0.8rem;">{{ field.errors }}</div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if form.DELETE %}
+                    <div style="margin-top: 1rem;">
+                        <label style="display: inline-flex; align-items: center; font-size: 0.9rem;">
+                            {{ form.DELETE }} Удалить это измерение
+                        </label>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+
+            <button type="button" id="add-more" style="background: #95a5a6; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; margin-top: 1rem;">
+                + Добавить еще измерение
+            </button>
+        </div>
+
+        <div style="display: flex; gap: 1rem;">
+            <button type="submit" style="background: #3498db; color: white; padding: 0.75rem 1.5rem; border: none; border-radius: 4px;">
+                Сохранить сессию измерений
+            </button>
+            <a href="{% url 'dashboard' %}" style="background: #95a5a6; color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 4px; display: inline-block;">
+                Отмена
+            </a>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const addButton = document.getElementById('add-more');
+    const container = document.getElementById('measurements-container');
+    const totalForms = document.getElementById('id_singlepdmeasurement_set-TOTAL_FORMS');
+    let formCount = parseInt(totalForms.value);
+
+    addButton.addEventListener('click', function() {
+        // Находим последнюю форму для клонирования
+        const lastForm = container.querySelector('.measurement-form:last-child');
+        const newForm = lastForm.cloneNode(true);
+
+        // Обновляем индексы в новой форме
+        const inputs = newForm.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+            if (input.name) {
+                input.name = input.name.replace(/-\d+-/, `-${formCount}-`);
+                input.id = input.id.replace(/-\d+-/, `-${formCount}-`);
+            }
+            if (input.type !== 'checkbox' && input.type !== 'hidden') {
+                input.value = '';
+            }
+        });
+
+        // Обновляем заголовок
+        const header = newForm.querySelector('h4');
+        header.textContent = `Измерение ${formCount + 1}`;
+
+        // Сбрасываем чекбокс удаления
+        const deleteCheckbox = newForm.querySelector('input[type="checkbox"]');
+        if (deleteCheckbox) {
+            deleteCheckbox.checked = false;
+        }
+
+        container.appendChild(newForm);
+        formCount++;
+        totalForms.value = formCount;
+    });
+});
+</script>
+
+<style>
+.measurement-form input, .measurement-form select {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+</style>
+{% endblock %}

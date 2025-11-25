@@ -1,0 +1,97 @@
+{% extends 'cable_manager/base.html' %}
+
+{% block content %}
+<div style="max-width: 1200px; margin: 0 auto;">
+    <h2>Статистика предприятия</h2>
+    
+    <!-- Карточки с общей статистикой -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+        <div style="background: #3498db; color: white; padding: 1.5rem; border-radius: 8px; text-align: center;">
+            <h3 style="margin: 0; font-size: 2rem;">{{ total_cables }}</h3>
+            <p style="margin: 0;">Кабельных линий</p>
+        </div>
+        <div style="background: #27ae60; color: white; padding: 1.5rem; border-radius: 8px; text-align: center;">
+            <h3 style="margin: 0; font-size: 2rem;">{{ total_measurements }}</h3>
+            <p style="margin: 0;">Измерений ЧР</p>
+        </div>
+        <div style="background: #e67e22; color: white; padding: 1.5rem; border-radius: 8px; text-align: center;">
+            <h3 style="margin: 0; font-size: 2rem;">{{ total_tests }}</h3>
+            <p style="margin: 0;">Испытаний</p>
+        </div>
+        <div style="background: #e74c3c; color: white; padding: 1.5rem; border-radius: 8px; text-align: center;">
+            <h3 style="margin: 0; font-size: 2rem;">{{ total_accidents }}</h3>
+            <p style="margin: 0;">Аварий</p>
+        </div>
+    </div>
+
+    <!-- Распределение рисков -->
+    <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
+        <h3>Распределение рисков</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+            <div style="text-align: center;">
+                <div style="background: #27ae60; color: white; padding: 1rem; border-radius: 8px;">
+                    <h4 style="margin: 0;">{{ risk_distribution.Низкий }}</h4>
+                    <p style="margin: 0;">Низкий риск</p>
+                </div>
+            </div>
+            <div style="text-align: center;">
+                <div style="background: #f39c12; color: white; padding: 1rem; border-radius: 8px;">
+                    <h4 style="margin: 0;">{{ risk_distribution.Средний }}</h4>
+                    <p style="margin: 0;">Средний риск</p>
+                </div>
+            </div>
+            <div style="text-align: center;">
+                <div style="background: #e74c3c; color: white; padding: 1rem; border-radius: 8px;">
+                    <h4 style="margin: 0;">{{ risk_distribution.Высокий }}</h4>
+                    <p style="margin: 0;">Высокий риск</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Список кабельных линий -->
+    <div>
+        <h3>Все кабельные линии</h3>
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background: #34495e; color: white;">
+                        <th style="padding: 0.75rem; text-align: left;">Номер линии</th>
+                        <th style="padding: 0.75rem; text-align: left;">Марка кабеля</th>
+                        <th style="padding: 0.75rem; text-align: left;">Длина</th>
+                        <th style="padding: 0.75rem; text-align: left;">Ввод в эксплуатацию</th>
+                        <th style="padding: 0.75rem; text-align: left;">Измерения</th>
+                        <th style="padding: 0.75rem; text-align: left;">Испытания</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cable in cable_lines %}
+                    <tr style="border-bottom: 1px solid #ddd;">
+                        <td style="padding: 0.75rem;">
+                            <a href="{% url 'cable_line_detail' cable.id %}" style="text-decoration: none; color: #3498db;">
+                                {{ cable.number }}
+                            </a>
+                        </td>
+                        <td style="padding: 0.75rem;">{{ cable.cable_brand }}</td>
+                        <td style="padding: 0.75rem;">{{ cable.length }} м</td>
+                        <td style="padding: 0.75rem;">{{ cable.commissioning_date }}</td>
+                        <td style="padding: 0.75rem;">
+                            {{ cable.pddmeasurementsession_set.count }}
+                        </td>
+                        <td style="padding: 0.75rem;">
+                            {{ cable.highvoltagetest_set.count }}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" style="padding: 1rem; text-align: center; color: #666;">
+                            Нет кабельных линий
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

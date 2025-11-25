@@ -1,0 +1,31 @@
+{% extends 'cable_manager/base.html' %}
+
+{% block content %}
+<h2>Дашборд предприятия: {{ enterprise.name }}</h2>
+
+<div style="margin-bottom: 2rem; display: flex; gap: 1rem;">
+    <a href="{% url 'add_cable_line' %}" style="background: #27ae60; color: white; padding: 0.5rem 1rem; text-decoration: none; border-radius: 4px;">
+        + Добавить линию
+    </a>
+    <a href="{% url 'add_measurement_session' %}" style="background: #3498db; color: white; padding: 0.5rem 1rem; text-decoration: none; border-radius: 4px;">
+        + Измерения ЧР
+    </a>
+    <a href="{% url 'add_high_voltage_test' %}" style="background: #e67e22; color: white; padding: 0.5rem 1rem; text-decoration: none; border-radius: 4px;">
+        + Испытания
+    </a>
+</div>
+
+<div class="cable-grid">
+    {% for cable in cable_lines %}
+    <div class="cable-card">
+        <h3><a href="{% url 'cable_line_detail' cable.id %}" style="text-decoration: none; color: #2c3e50;">{{ cable.number }}</a></h3>
+        <p><strong>Марка кабеля:</strong> {{ cable.cable_brand }}</p>
+        <p><strong>Длина:</strong> {{ cable.length }} м</p>
+        <p><strong>Ввод в эксплуатацию:</strong> {{ cable.commissioning_date }}</p>
+        <p><strong>Жил:</strong> {{ cable.core_count }}</p>
+    </div>
+    {% empty %}
+    <p>Нет кабельных линий для отображения</p>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Мониторинг кабельных линий{% endblock %}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+        .header { background: #2c3e50; color: white; padding: 1rem; }
+        .nav { display: flex; justify-content: space-between; align-items: center; }
+        .nav-links a { color: white; margin-left: 1rem; text-decoration: none; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+        .messages { list-style: none; padding: 0; }
+        .messages li { padding: 0.5rem; margin: 0.5rem 0; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .cable-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
+        .cable-card { border: 1px solid #ddd; padding: 1rem; border-radius: 8px; }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="header">
+        <div class="nav">
+            <h1>Мониторинг кабельных линий</h1>
+            <div class="nav-links">
+                {% if user.is_authenticated %}
+                    <span>Привет, {{ user.username }}</span>
+                    <a href="{% url 'dashboard' %}">Дашборд</a>
+                    <a href="{% url 'statistics' %}">Статистика</a>
+                    <a href="{% url 'ai_analysis' %}">ИИ-анализ</a>
+                    <a href="{% url 'logout' %}">Выйти</a>
+                {% else %}
+                    <a href="{% url 'login' %}">Войти</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li class="{% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        {% block content %}
+        {% endblock %}
+    </div>
+</body>
+</html>

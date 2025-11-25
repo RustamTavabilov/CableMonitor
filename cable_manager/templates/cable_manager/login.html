@@ -1,0 +1,21 @@
+{% extends 'cable_manager/base.html' %}
+
+{% block content %}
+<div style="max-width: 400px; margin: 0 auto;">
+    <h2>Вход в систему</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div style="margin-bottom: 1rem;">
+            <label>Имя пользователя:</label>
+            <input type="text" name="username" required style="width: 100%; padding: 0.5rem; margin-top: 0.25rem;">
+        </div>
+        <div style="margin-bottom: 1rem;">
+            <label>Пароль:</label>
+            <input type="password" name="password" required style="width: 100%; padding: 0.5rem; margin-top: 0.25rem;">
+        </div>
+        <button type="submit" style="background: #3498db; color: white; padding: 0.75rem 1.5rem; border: none; border-radius: 4px; width: 100%;">
+            Войти
+        </button>
+    </form>
+</div>
+{% endblock %}

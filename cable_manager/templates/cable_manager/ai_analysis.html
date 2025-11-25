@@ -1,0 +1,92 @@
+{% extends 'cable_manager/base.html' %}
+
+{% block content %}
+<div style="max-width: 1000px; margin: 0 auto;">
+    <h2>ИИ-анализ рисков кабельных линий</h2>
+
+    <!-- Статус модели -->
+    <div style="background: {% if model_trained %}#d4edda{% else %}#f8d7da{% endif %}; 
+                padding: 1rem; border-radius: 8px; margin-bottom: 2rem;">
+        <h3 style="margin-top: 0;">Статус ИИ-модели</h3>
+        <p>
+            {% if model_trained %}
+                ✅ Модель обучена и готова к анализу
+            {% else %}
+                ❌ Модель не обучена. Необходимо обучить модель на имеющихся данных.
+            {% endif %}
+        </p>
+        {% if not model_trained %}
+        <a href="{% url 'train_ai_model' %}" style="background: #3498db; color: white; padding: 0.5rem 1rem; 
+                   text-decoration: none; border-radius: 4px; display: inline-block;">
+            Обучить модель
+        </a>
+        {% endif %}
+    </div>
+
+    <!-- Анализ рисков -->
+    <div style="margin-bottom: 2rem;">
+        <h3>Анализ рисков аварий</h3>
+        {% if risk_analysis %}
+            <div style="display: grid; gap: 1rem;">
+                {% for analysis in risk_analysis %}
+                <div style="border: 2px solid {{ analysis.color }}; padding: 1rem; border-radius: 8px;">
+                    <div style="display: flex; justify-content: between; align-items: center;">
+                        <h4 style="margin: 0;">{{ analysis.cable.number }}</h4>
+                        <span style="background: {{ analysis.color }}; color: white; padding: 0.25rem 0.5rem; 
+                                    border-radius: 4px; font-weight: bold;">
+                            {{ analysis.risk_level }} ({{ analysis.probability }})
+                        </span>
+                    </div>
+                    <p style="margin: 0.5rem 0 0 0; color: #666;">
+                        {{ analysis.cable.cable_brand }} • {{ analysis.cable.length }}м • 
+                        Ввод: {{ analysis.cable.commissioning_date }}
+                    </p>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p style="color: #666; text-align: center; padding: 2rem;">
+                {% if model_trained %}
+                    Нет данных для анализа
+                {% else %}
+                    Сначала обучите модель
+                {% endif %}
+            </p>
+        {% endif %}
+    </div>
+
+    <!-- Важность признаков -->
+    {% if model_trained and feature_importance %}
+    <div style="margin-bottom: 2rem;">
+        <h3>Важность факторов в прогнозировании</h3>
+        <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px;">
+            {% for feature, importance in feature_importance %}
+            <div style="margin-bottom: 0.5rem;">
+                <div style="display: flex; justify-content: between; align-items: center;">
+                    <span>{{ feature }}</span>
+                    <span style="font-weight: bold;">{{ importance|floatformat:3 }}</span>
+                </div>
+                <div style="background: #ddd; height: 8px; border-radius: 4px; margin-top: 0.25rem;">
+                    <div style="background: #3498db; height: 100%; width: {{ importance|floatformat:3 }}%; 
+                                border-radius: 4px;"></div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Кнопка переобучения -->
+    {% if model_trained %}
+    <div style="text-align: center; margin-top: 2rem;">
+        <a href="{% url 'train_ai_model' %}" style="background: #e67e22; color: white; padding: 0.75rem 1.5rem; 
+                   text-decoration: none; border-radius: 4px; display: inline-block;">
+            Переобучить модель на новых данных
+        </a>
+        <p style="color: #666; font-size: 0.9rem; margin-top: 0.5rem;">
+            Модель автоматически обучается при каждом вызове этой функции
+        </p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

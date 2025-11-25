@@ -1,0 +1,151 @@
+{% extends 'cable_manager/base.html' %}
+
+{% block content %}
+<div style="max-width: 1000px; margin: 0 auto;">
+    <!-- Заголовок и навигация -->
+    <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 2rem;">
+        <div>
+            <h2 style="margin: 0;">Кабельная линия: {{ cable_line.number }}</h2>
+            <p style="color: #666; margin: 0;">Предприятие: {{ cable_line.enterprise.name }}</p>
+        </div>
+        <a href="{% url 'dashboard' %}" style="background: #95a5a6; color: white; padding: 0.5rem 1rem; text-decoration: none; border-radius: 4px;">
+            ← Назад к списку
+        </a>
+    </div>
+
+    <!-- Основная информация о кабеле -->
+    <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
+        <h3 style="margin-top: 0;">Основные параметры</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+            <div>
+                <p><strong>Марка кабеля:</strong> {{ cable_line.cable_brand }}</p>
+                <p><strong>Длина:</strong> {{ cable_line.length }} м</p>
+                <p><strong>Количество жил:</strong> {{ cable_line.core_count }}</p>
+            </div>
+            <div>
+                <p><strong>Дата ввода в эксплуатацию:</strong> {{ cable_line.commissioning_date }}</p>
+                <p><strong>Начальная муфта:</strong> {{ cable_line.start_muff }}</p>
+                <p><strong>Конечная муфта:</strong> {{ cable_line.end_muff }}</p>
+            </div>
+            <div>
+                <p><strong>Соединительная муфта 1:</strong> {{ cable_line.connect_muff_1|default:"Отсутствует" }}</p>
+                <p><strong>Соединительная муфта 2:</strong> {{ cable_line.connect_muff_2|default:"Отсутствует" }}</p>
+                <p><strong>Соединительная муфта 3:</strong> {{ cable_line.connect_muff_3|default:"Отсутствует" }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Сессии измерений ЧР -->
+    <div style="margin-bottom: 2rem;">
+        <h3>История измерений частичных разрядов</h3>
+        {% if measurements %}
+            {% for measurement in measurements %}
+            <div style="border: 1px solid #ddd; padding: 1rem; margin-bottom: 1rem; border-radius: 4px;">
+                <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 1rem;">
+                    <h4 style="margin: 0;">Сессия от {{ measurement.session_date }}</h4>
+                    <span style="color: #666; font-size: 0.9rem;">Создана: {{ measurement.created_at }}</span>
+                </div>
+                
+                {% if measurement.notes %}
+                <p style="margin-bottom: 1rem;"><strong>Примечания:</strong> {{ measurement.notes }}</p>
+                {% endif %}
+                
+                <!-- Измерения при разных напряжениях -->
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: #34495e; color: white;">
+                                <th style="padding: 0.5rem; text-align: left;">Напряжение (кВ)</th>
+                                <th style="padding: 0.5rem; text-align: left;">Жила 1 ЧР (пКл)</th>
+                                <th style="padding: 0.5rem; text-align: left;">Жила 1 Расст. (м)</th>
+                                <th style="padding: 0.5rem; text-align: left;">Жила 2 ЧР (пКл)</th>
+                                <th style="padding: 0.5rem; text-align: left;">Жила 2 Расст. (м)</th>
+                                <th style="padding: 0.5rem; text-align: left;">Жила 3 ЧР (пКл)</th>
+                                <th style="padding: 0.5rem; text-align: left;">Жила 3 Расст. (м)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for single_measurement in measurement.singlepdmeasurement_set.all %}
+                            <tr style="border-bottom: 1px solid #ddd;">
+                                <td style="padding: 0.5rem;">{{ single_measurement.voltage_level }}</td>
+                                <td style="padding: 0.5rem;">{{ single_measurement.core_1_discharge|default:"-" }}</td>
+                                <td style="padding: 0.5rem;">{{ single_measurement.core_1_distance|default:"-" }}</td>
+                                <td style="padding: 0.5rem;">{{ single_measurement.core_2_discharge|default:"-" }}</td>
+                                <td style="padding: 0.5rem;">{{ single_measurement.core_2_distance|default:"-" }}</td>
+                                <td style="padding: 0.5rem;">{{ single_measurement.core_3_discharge|default:"-" }}</td>
+                                <td style="padding: 0.5rem;">{{ single_measurement.core_3_distance|default:"-" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p style="color: #666; text-align: center; padding: 2rem;">Нет данных об измерениях ЧР</p>
+        {% endif %}
+    </div>
+
+    <!-- Высоковольтные испытания -->
+    <div style="margin-bottom: 2rem;">
+        <h3>История высоковольтных испытаний</h3>
+        {% if tests %}
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #34495e; color: white;">
+                            <th style="padding: 0.5rem; text-align: left;">Дата испытания</th>
+                            <th style="padding: 0.5rem; text-align: left;">Напряжение (кВ)</th>
+                            <th style="padding: 0.5rem; text-align: left;">Сопротивление (МОм)</th>
+                            <th style="padding: 0.5rem; text-align: left;">Дата записи</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for test in tests %}
+                        <tr style="border-bottom: 1px solid #ddd;">
+                            <td style="padding: 0.5rem;">{{ test.test_date }}</td>
+                            <td style="padding: 0.5rem;">{{ test.test_voltage }}</td>
+                            <td style="padding: 0.5rem;">{{ test.insulation_resistance }}</td>
+                            <td style="padding: 0.5rem;">{{ test.created_at }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p style="color: #666; text-align: center; padding: 2rem;">Нет данных о высоковольтных испытаниях</p>
+        {% endif %}
+    </div>
+
+    <!-- Аварии -->
+    <div style="margin-bottom: 2rem;">
+        <h3>История аварий</h3>
+        {% if accidents %}
+            {% for accident in accidents %}
+            <div style="border: 1px solid #ddd; padding: 1rem; margin-bottom: 1rem; border-radius: 4px;">
+                <div style="display: flex; justify-content: between; align-items: start; margin-bottom: 0.5rem;">
+                    <h4 style="margin: 0; color: #e74c3c;">{{ accident.get_accident_type_display }}</h4>
+                    <span style="color: #666; font-size: 0.9rem;">{{ accident.accident_date }}</span>
+                </div>
+                <p style="margin-bottom: 0.5rem;"><strong>Описание:</strong> {{ accident.description }}</p>
+                {% if accident.downtime %}
+                <p style="margin: 0;"><strong>Время простоя:</strong> {{ accident.downtime }}</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+            <p style="color: #666; text-align: center; padding: 2rem;">Нет данных об авариях</p>
+        {% endif %}
+    </div>
+
+    <!-- Кнопки действий -->
+    <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem;">
+        <a href="{% url 'add_measurement_session' %}" style="background: #3498db; color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 4px;">
+            Добавить измерения ЧР
+        </a>
+        <a href="{% url 'add_high_voltage_test' %}" style="background: #e67e22; color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 4px;">
+            Добавить испытания
+        </a>
+    </div>
+</div>
+{% endblock %}
