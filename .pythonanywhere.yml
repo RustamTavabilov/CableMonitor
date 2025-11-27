@@ -1,0 +1,22 @@
+# PythonAnywhere configuration file
+version: 1.0
+
+# Web app source code and virtualenv
+source:
+  virtualenv_path: /home/yourusername/.virtualenvs/cable-monitor
+
+# Web app settings
+python:
+  version: 3.11
+
+# Database setup
+database:
+  name: yourusername$cable_monitor
+  engine: mysql
+  script: |
+    CREATE DATABASE IF NOT EXISTS yourusername$cable_monitor;
+
+# Deployment tasks
+deploy:
+  - python manage.py migrate
+  - python manage.py collectstatic --noinput
