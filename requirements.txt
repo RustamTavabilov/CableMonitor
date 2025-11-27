@@ -2,6 +2,6 @@ Django==4.2.7
 gunicorn
 mysqlclient
 scikit-learn==1.3.0
-pandas==2.0.3
+pandas==1.5.3  # Более старая, но меньшая версия
 numpy==1.24.3
 joblib==1.3.2
